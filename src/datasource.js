@@ -9,7 +9,6 @@ export class GenericDatasource {
     this.id = instanceSettings.id;
     this.q = $q;
     this.backendSrv = backendSrv;
-    this.backend = true;
     this.templateSrv = templateSrv;
     this.withCredentials = instanceSettings.withCredentials;
     this.headers = {'Content-Type': 'application/json'};
@@ -41,6 +40,8 @@ export class GenericDatasource {
       if (response.status === 200) {
         return { status: "success", message: "Data source is working", title: "Success" };
       }
+    }).catch(error => {
+      return { status: "failed", message: "Data source is not working", title: "Error" };
     });
   }
 
@@ -91,32 +92,37 @@ export class GenericDatasource {
   }
 
   doRequest(options) {
-    if (this.backend) {
-      return this.backendSrv.datasourceRequest({
-        url: '/api/tsdb/query',
-        method: 'POST',
-        data: {
-          from: options.data.range.from.valueOf().toString(),
-          to: options.data.range.to.valueOf().toString(),
-          queries: options.data.targets,
-        }
-      }).then(result => {
-        var res= [];
-        _.forEach(result.data.results, r => {
-          _.forEach(r.series, s => {
-            res.push({target: s.name, datapoints: s.points});
-          })
-        })
+    let backendParams = {
+      url: options.url,
+      method: options.method
+    };
 
-        result.data = res;
-        return result;
-      });
-    } else {
-      options.withCredentials = this.withCredentials;
-      options.headers = this.headers;
-
-      return this.backendSrv.datasourceRequest(options);
+    if (options.range) {
+      backendParams.from = options.range.from.valueOf().toString();
+      backendParams.to = options.range.to.valueOf().toString();
     }
+
+    if (options.targets) {
+      backendParams.queries = options.targets;
+    }
+
+    const params = {
+      url: '/api/tsdb/query',
+      method: 'POST',
+      data: backendParams
+    };
+
+    return this.backendSrv.datasourceRequest(params).then(result => {
+      var res= [];
+      _.forEach(result.data.results, r => {
+        _.forEach(r.series, s => {
+          res.push({target: s.name, datapoints: s.points});
+        });
+      });
+
+      result.data = res;
+      return result;
+    });
   }
 
   buildQueryParameters(options) {
