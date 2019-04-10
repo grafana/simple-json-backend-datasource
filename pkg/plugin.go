@@ -20,7 +20,7 @@ func main() {
 			MagicCookieValue: "datasource",
 		},
 		Plugins: map[string]plugin.Plugin{
-			"backend-datasource": &datasource.DatasourcePluginImpl{Plugin: &JsonDatasource{}},
+			"simple-json-backend-datasource": &datasource.DatasourcePluginImpl{Plugin: &JsonDatasource{}},
 		},
 
 		// A non-nil value here enables gRPC serving for this plugin...
