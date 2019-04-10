@@ -1,0 +1,43 @@
+{
+  "id": "grafana-simple-json-backend-datasource",
+  "name": "Simple Json backend",
+  "type": "datasource",
+
+  "partials": {
+    "config": "public/app/plugins/datasource/simplejson/partials/config.html"
+  },
+
+  "metrics": true,
+  "annotations": true,
+  "backend": true,
+  "executable": "simple-json-plugin",
+
+  "info": {
+    "description": "simple json datasource",
+    "author": {
+      "name": "Grafana Labs",
+      "url": "https://grafana.com"
+    },
+    "logos": {
+      "small": "img/simpleJson_logo.svg",
+      "large": "img/simpleJson_logo.svg"
+    },
+    "links": [
+      {
+        "name": "GitHub",
+        "url": "https://github.com/grafana/simple-json-backend-datasource"
+      },
+      {
+        "name": "MIT License",
+        "url": "https://github.com/grafana/simple-json-backend-datasource/blob/master/LICENSE"
+      }
+    ],
+    "version": "1.0.0",
+    "updated": "2019-04-10"
+  },
+
+  "dependencies": {
+    "grafanaVersion": "6.x.x",
+    "plugins": []
+  }
+}
