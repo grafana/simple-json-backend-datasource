@@ -165,9 +165,19 @@ Example map response
 
 This plugin requires node 6.10.0
 
-`npm install -g yarn`
-`yarn install`
-`npm run build`
+```sh
+npm install -g yarn
+yarn install --pure-lockfile
+make
+```
+
+#### Running fake JSON server
+
+```sh
+cd devenv
+docker-compose up -d
+```
+This will build and run fake sever on the `http://localhost:3333`.
 
 ### Changelog
 
