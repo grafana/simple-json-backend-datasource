@@ -10,7 +10,9 @@ import (
 )
 
 func main() {
-	log.SetOutput(os.Stderr) // the plugin sends logs to the host process on strErr
+	// The plugin should sends logs to the Stderr
+	log.SetOutput(os.Stderr)
+	log.Println("Running Simple JSON backend datasource")
 
 	plugin.Serve(&plugin.ServeConfig{
 

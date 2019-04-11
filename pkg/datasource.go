@@ -28,6 +28,7 @@ func (ds *JsonDatasource) Query(ctx context.Context, tsdbReq *datasource.Datasou
 	ds_response := &datasource.DatasourceResponse{}
 
 	request, err := ds.createRequest(tsdbReq)
+	log.Printf("%s %s", request.Method, request.URL.String())
 	if err != nil {
 		return nil, err
 	}
@@ -58,6 +59,7 @@ func (ds *JsonDatasource) Query(ctx context.Context, tsdbReq *datasource.Datasou
 }
 
 func (ds *JsonDatasource) createRequest(tsdbReq *datasource.DatasourceRequest) (*http.Request, error) {
+	log.Println(tsdbReq.String())
 	payload := simplejson.New()
 	payload.SetPath([]string{"range", "to"}, tsdbReq.TimeRange.ToRaw)
 	payload.SetPath([]string{"range", "from"}, tsdbReq.TimeRange.FromRaw)

@@ -33,9 +33,14 @@ export class GenericDatasource {
   }
 
   testDatasource() {
+    const testQuery = {
+      refId: 'A',
+      datasourceId: this.id,
+    };
     return this.doRequest({
       url: this.url + '/',
       method: 'GET',
+      targets: [testQuery]
     }).then(response => {
       if (response.status === 200) {
         return { status: "success", message: "Data source is working", title: "Success" };
@@ -112,6 +117,7 @@ export class GenericDatasource {
       data: backendParams
     };
 
+    console.log(params);
     return this.backendSrv.datasourceRequest(params).then(result => {
       var res= [];
       _.forEach(result.data.results, r => {
