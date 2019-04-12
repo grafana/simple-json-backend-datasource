@@ -1,13 +1,20 @@
 import _ from "lodash";
 
 export class GenericDatasource {
+  name: string;
+  type: string;
+  id: string;
+  url: string;
+  withCredentials: boolean;
+  instanceSettings: any;
+  headers: any;
 
-  constructor(instanceSettings, $q, backendSrv, templateSrv) {
+  /** @ngInject */
+  constructor(instanceSettings, private backendSrv, private templateSrv) {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
     this.id = instanceSettings.id;
-    this.q = $q;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
     this.withCredentials = instanceSettings.withCredentials;
@@ -22,7 +29,7 @@ export class GenericDatasource {
     query.targets = query.targets.filter(t => !t.hide);
 
     if (query.targets.length <= 0) {
-      return this.q.when({data: []});
+      return Promise.resolve({data: []});
     }
 
     return this.doRequest({
@@ -44,6 +51,8 @@ export class GenericDatasource {
     }).then(response => {
       if (response.status === 200) {
         return { status: "success", message: "Data source is working", title: "Success" };
+      } else {
+        return { status: "failed", message: "Data source is not working", title: "Error" };
       }
     }).catch(error => {
       return { status: "failed", message: "Data source is not working", title: "Error" };
@@ -97,7 +106,7 @@ export class GenericDatasource {
   }
 
   doRequest(options) {
-    let backendParams = {
+    let backendParams: any = {
       url: options.url,
       method: options.method
     };
