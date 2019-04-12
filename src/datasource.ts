@@ -1,5 +1,28 @@
 import _ from "lodash";
 
+interface TSDBMetricRequest {
+  from: string;
+  to: string;
+  queries: any[];
+}
+
+interface TSDBMetricQuery {
+  datasourceId: string;
+  refId: string;
+  queryType: string;
+  hide: boolean;
+  target: any;
+  type: 'timeserie' | 'table';
+}
+
+interface TSDBRequestOptions {
+  range: {
+    from: any;
+    to: any;
+  };
+  targets: TSDBMetricQuery[];
+}
+
 export class GenericDatasource {
   name: string;
   type: string;
@@ -10,13 +33,11 @@ export class GenericDatasource {
   headers: any;
 
   /** @ngInject */
-  constructor(instanceSettings, private backendSrv, private templateSrv) {
+  constructor(instanceSettings, private backendSrv, private templateSrv, private timeSrv) {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
     this.id = instanceSettings.id;
-    this.backendSrv = backendSrv;
-    this.templateSrv = templateSrv;
     this.withCredentials = instanceSettings.withCredentials;
     this.headers = {'Content-Type': 'application/json'};
     if (typeof instanceSettings.basicAuth === 'string' && instanceSettings.basicAuth.length > 0) {
@@ -30,12 +51,6 @@ export class GenericDatasource {
 
     if (query.targets.length <= 0) {
       return Promise.resolve({data: []});
-    }
-
-    if (this.templateSrv.getAdhocFilters) {
-      query.adhocFilters = this.templateSrv.getAdhocFilters(this.name);
-    } else {
-      query.adhocFilters = [];
     }
 
     return this.doTsdbRequest(query).then(handleTsdbResponse);
@@ -88,18 +103,7 @@ export class GenericDatasource {
       url: this.url + '/search',
       data: interpolated,
       method: 'POST',
-    }).then(this.mapToTextValue);
-  }
-
-  mapToTextValue(result) {
-    return _.map(result.data, (d, i) => {
-      if (d && d.text && d.value) {
-        return { text: d.text, value: d.value };
-      } else if (_.isObject(d)) {
-        return { text: d, value: i};
-      }
-      return { text: d, value: d };
-    });
+    }).then(mapToTextValue);
   }
 
   doRequest(options) {
@@ -109,19 +113,21 @@ export class GenericDatasource {
     return this.backendSrv.datasourceRequest(options);
   }
 
-  doTsdbRequest(options) {
+  doTsdbRequest(options: TSDBRequestOptions) {
+    const tsdbRequestData: TSDBMetricRequest = {
+      from: options.range.from.valueOf().toString(),
+      to: options.range.to.valueOf().toString(),
+      queries: options.targets,
+    };
+
     return this.backendSrv.datasourceRequest({
       url: '/api/tsdb/query',
       method: 'POST',
-      data: {
-        from: options.range.from.valueOf().toString(),
-        to: options.range.to.valueOf().toString(),
-        queries: options.targets,
-      }
+      data: tsdbRequestData
     });
   }
 
-  buildQueryParameters(options) {
+  buildQueryParameters(options: any): TSDBRequestOptions {
     //remove placeholder targets
     options.targets = _.filter(options.targets, target => {
       return target.target !== 'select metric';
@@ -183,4 +189,15 @@ function handleTsdbResponse(response) {
 
   response.data = res;
   return response;
+}
+
+function mapToTextValue(result) {
+  return _.map(result.data, (d, i) => {
+    if (d && d.text && d.value) {
+      return { text: d.text, value: d.value };
+    } else if (_.isObject(d)) {
+      return { text: d, value: i};
+    }
+    return { text: d, value: d };
+  });
 }
