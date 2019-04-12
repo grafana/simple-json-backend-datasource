@@ -14,6 +14,7 @@ export class GenericDatasource {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
+    this.id = instanceSettings.id;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
     this.withCredentials = instanceSettings.withCredentials;
@@ -24,7 +25,7 @@ export class GenericDatasource {
   }
 
   query(options) {
-    var query = this.buildQueryParameters(options);
+    const query = this.buildQueryParameters(options);
     query.targets = query.targets.filter(t => !t.hide);
 
     if (query.targets.length <= 0) {
@@ -37,11 +38,7 @@ export class GenericDatasource {
       query.adhocFilters = [];
     }
 
-    return this.doRequest({
-      url: this.url + '/query',
-      data: query,
-      method: 'POST'
-    });
+    return this.doTsdbRequest(query).then(handleTsdbResponse);
   }
 
   testDatasource() {
@@ -112,18 +109,32 @@ export class GenericDatasource {
     return this.backendSrv.datasourceRequest(options);
   }
 
+  doTsdbRequest(options) {
+    return this.backendSrv.datasourceRequest({
+      url: '/api/tsdb/query',
+      method: 'POST',
+      data: {
+        from: options.range.from.valueOf().toString(),
+        to: options.range.to.valueOf().toString(),
+        queries: options.targets,
+      }
+    });
+  }
+
   buildQueryParameters(options) {
     //remove placeholder targets
     options.targets = _.filter(options.targets, target => {
       return target.target !== 'select metric';
     });
 
-    var targets = _.map(options.targets, target => {
+    const targets = _.map(options.targets, target => {
       return {
+        queryType: 'query',
         target: this.templateSrv.replace(target.target, options.scopedVars, 'regex'),
         refId: target.refId,
         hide: target.hide,
-        type: target.type || 'timeserie'
+        type: target.type || 'timeserie',
+        datasourceId: this.id
       };
     });
 
@@ -155,4 +166,21 @@ export class GenericDatasource {
       });
     });
   }
+}
+
+function handleTsdbResponse(response) {
+  const res= [];
+  _.forEach(response.data.results, r => {
+    _.forEach(r.series, s => {
+      res.push({target: s.name, datapoints: s.points});
+    });
+    _.forEach(r.tables, t => {
+      t.type = 'table';
+      t.refId = r.refId;
+      res.push(t);
+    });
+  });
+
+  response.data = res;
+  return response;
 }
