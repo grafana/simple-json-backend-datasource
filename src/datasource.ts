@@ -14,7 +14,6 @@ export class GenericDatasource {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
-    this.id = instanceSettings.id;
     this.backendSrv = backendSrv;
     this.templateSrv = templateSrv;
     this.withCredentials = instanceSettings.withCredentials;
@@ -32,6 +31,12 @@ export class GenericDatasource {
       return Promise.resolve({data: []});
     }
 
+    if (this.templateSrv.getAdhocFilters) {
+      query.adhocFilters = this.templateSrv.getAdhocFilters(this.name);
+    } else {
+      query.adhocFilters = [];
+    }
+
     return this.doRequest({
       url: this.url + '/query',
       data: query,
@@ -40,14 +45,9 @@ export class GenericDatasource {
   }
 
   testDatasource() {
-    const testQuery = {
-      refId: 'A',
-      datasourceId: this.id,
-    };
     return this.doRequest({
       url: this.url + '/',
       method: 'GET',
-      targets: [testQuery]
     }).then(response => {
       if (response.status === 200) {
         return { status: "success", message: "Data source is working", title: "Success" };
@@ -106,38 +106,10 @@ export class GenericDatasource {
   }
 
   doRequest(options) {
-    let backendParams: any = {
-      url: options.url,
-      method: options.method
-    };
+    options.withCredentials = this.withCredentials;
+    options.headers = this.headers;
 
-    if (options.range) {
-      backendParams.from = options.range.from.valueOf().toString();
-      backendParams.to = options.range.to.valueOf().toString();
-    }
-
-    if (options.targets) {
-      backendParams.queries = options.targets;
-    }
-
-    const params = {
-      url: '/api/tsdb/query',
-      method: 'POST',
-      data: backendParams
-    };
-
-    console.log(params);
-    return this.backendSrv.datasourceRequest(params).then(result => {
-      var res= [];
-      _.forEach(result.data.results, r => {
-        _.forEach(r.series, s => {
-          res.push({target: s.name, datapoints: s.points});
-        });
-      });
-
-      result.data = res;
-      return result;
-    });
+    return this.backendSrv.datasourceRequest(options);
   }
 
   buildQueryParameters(options) {
@@ -151,13 +123,36 @@ export class GenericDatasource {
         target: this.templateSrv.replace(target.target, options.scopedVars, 'regex'),
         refId: target.refId,
         hide: target.hide,
-        type: target.type || 'timeserie',
-        datasourceId: this.id
+        type: target.type || 'timeserie'
       };
     });
 
     options.targets = targets;
 
     return options;
+  }
+
+  getTagKeys(options) {
+    return new Promise((resolve, reject) => {
+      this.doRequest({
+        url: this.url + '/tag-keys',
+        method: 'POST',
+        data: options
+      }).then(result => {
+        return resolve(result.data);
+      });
+    });
+  }
+
+  getTagValues(options) {
+    return new Promise((resolve, reject) => {
+      this.doRequest({
+        url: this.url + '/tag-values',
+        method: 'POST',
+        data: options
+      }).then(result => {
+        return resolve(result.data);
+      });
+    });
   }
 }
