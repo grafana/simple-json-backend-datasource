@@ -33,7 +33,7 @@ export class GenericDatasource {
   headers: any;
 
   /** @ngInject */
-  constructor(instanceSettings, private backendSrv, private templateSrv, private timeSrv) {
+  constructor(instanceSettings, private backendSrv, private templateSrv) {
     this.type = instanceSettings.type;
     this.url = instanceSettings.url;
     this.name = instanceSettings.name;
@@ -174,7 +174,7 @@ export class GenericDatasource {
   }
 }
 
-function handleTsdbResponse(response) {
+export function handleTsdbResponse(response) {
   const res= [];
   _.forEach(response.data.results, r => {
     _.forEach(r.series, s => {
@@ -191,7 +191,7 @@ function handleTsdbResponse(response) {
   return response;
 }
 
-function mapToTextValue(result) {
+export function mapToTextValue(result) {
   return _.map(result.data, (d, i) => {
     if (d && d.text && d.value) {
       return { text: d.text, value: d.value };
