@@ -23,14 +23,113 @@ type JsonDatasource struct {
 	logger hclog.Logger
 }
 
-func (t *JsonDatasource) Query(ctx context.Context, tsdbReq *datasource.DatasourceRequest) (*datasource.DatasourceResponse, error) {
-	t.logger.Debug("Query", "datasource", tsdbReq.Datasource.Name, "TimeRange", tsdbReq.TimeRange)
+func (ds *JsonDatasource) Query(ctx context.Context, tsdbReq *datasource.DatasourceRequest) (*datasource.DatasourceResponse, error) {
+	ds.logger.Debug("Query", "datasource", tsdbReq.Datasource.Name, "TimeRange", tsdbReq.TimeRange)
 
-	remoteDsReq, err := t.createRequest(tsdbReq)
+	queryType, err := GetQueryType(tsdbReq)
 	if err != nil {
 		return nil, err
 	}
 
+	ds.logger.Debug("createRequest", "queryType", queryType)
+
+	switch queryType {
+	case "search":
+		return ds.SearchQuery(ctx, tsdbReq)
+	default:
+		return ds.MetricQuery(ctx, tsdbReq)
+	}
+}
+
+func (ds *JsonDatasource) MetricQuery(ctx context.Context, tsdbReq *datasource.DatasourceRequest) (*datasource.DatasourceResponse, error) {
+	remoteDsReq, err := ds.CreateMetricRequest(tsdbReq)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ds.MakeHttpRequest(ctx, remoteDsReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return ds.ParseQueryResponse(remoteDsReq.queries, body)
+}
+
+func (ds *JsonDatasource) CreateMetricRequest(tsdbReq *datasource.DatasourceRequest) (*RemoteDatasourceRequest, error) {
+	jsonQueries, err := parseJSONQueries(tsdbReq)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := simplejson.New()
+	payload.SetPath([]string{"range", "to"}, tsdbReq.TimeRange.ToRaw)
+	payload.SetPath([]string{"range", "from"}, tsdbReq.TimeRange.FromRaw)
+	payload.Set("targets", jsonQueries)
+
+	rbody, err := payload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	url := tsdbReq.Datasource.Url + "/query"
+	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(string(rbody)))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	return &RemoteDatasourceRequest{
+		queryType: "query",
+		req:       req,
+		queries:   jsonQueries,
+	}, nil
+}
+
+func (ds *JsonDatasource) SearchQuery(ctx context.Context, tsdbReq *datasource.DatasourceRequest) (*datasource.DatasourceResponse, error) {
+	remoteDsReq, err := ds.CreateSearchRequest(tsdbReq)
+	if err != nil {
+		return nil, err
+	}
+
+	body, err := ds.MakeHttpRequest(ctx, remoteDsReq)
+	if err != nil {
+		return nil, err
+	}
+
+	return ds.ParseSearchResponse(body)
+}
+
+func (ds *JsonDatasource) CreateSearchRequest(tsdbReq *datasource.DatasourceRequest) (*RemoteDatasourceRequest, error) {
+	jsonQueries, err := parseJSONQueries(tsdbReq)
+	if err != nil {
+		return nil, err
+	}
+
+	payload := simplejson.New()
+	payload.Set("target", jsonQueries[0].Get("target").MustString())
+
+	rbody, err := payload.MarshalJSON()
+	if err != nil {
+		return nil, err
+	}
+
+	url := tsdbReq.Datasource.Url + "/search"
+	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(string(rbody)))
+	if err != nil {
+		return nil, err
+	}
+
+	req.Header.Add("Content-Type", "application/json")
+
+	return &RemoteDatasourceRequest{
+		queryType: "search",
+		req:       req,
+		queries:   jsonQueries,
+	}, nil
+}
+
+func (ds *JsonDatasource) MakeHttpRequest(ctx context.Context, remoteDsReq *RemoteDatasourceRequest) ([]byte, error) {
 	res, err := ctxhttp.Do(ctx, httpClient, remoteDsReq.req)
 	if err != nil {
 		return nil, err
@@ -45,65 +144,36 @@ func (t *JsonDatasource) Query(ctx context.Context, tsdbReq *datasource.Datasour
 	if err != nil {
 		return nil, err
 	}
-
-	switch remoteDsReq.queryType {
-	case "search":
-		return t.parseSearchResponse(body)
-	default:
-		return t.parseQueryResponse(remoteDsReq.queries, body)
-	}
+	return body, nil
 }
 
-func (t *JsonDatasource) createRequest(tsdbReq *datasource.DatasourceRequest) (*remoteDatasourceRequest, error) {
-	jQueries := make([]*simplejson.Json, 0)
+func GetQueryType(tsdbReq *datasource.DatasourceRequest) (string, error) {
+	queryType := "query"
+	if len(tsdbReq.Queries) > 0 {
+		firstQuery := tsdbReq.Queries[0]
+		queryJson, err := simplejson.NewJson([]byte(firstQuery.ModelJson))
+		if err != nil {
+			return "", err
+		}
+		queryType = queryJson.Get("queryType").MustString("query")
+	}
+	return queryType, nil
+}
+
+func parseJSONQueries(tsdbReq *datasource.DatasourceRequest) ([]*simplejson.Json, error) {
+	jsonQueries := make([]*simplejson.Json, 0)
 	for _, query := range tsdbReq.Queries {
 		json, err := simplejson.NewJson([]byte(query.ModelJson))
 		if err != nil {
 			return nil, err
 		}
 
-		jQueries = append(jQueries, json)
+		jsonQueries = append(jsonQueries, json)
 	}
-
-	queryType := "query"
-	if len(jQueries) > 0 {
-		queryType = jQueries[0].Get("queryType").MustString("query")
-	}
-
-	t.logger.Debug("createRequest", "queryType", queryType)
-
-	payload := simplejson.New()
-
-	switch queryType {
-	case "search":
-		payload.Set("target", jQueries[0].Get("target").MustString())
-	default:
-		payload.SetPath([]string{"range", "to"}, tsdbReq.TimeRange.ToRaw)
-		payload.SetPath([]string{"range", "from"}, tsdbReq.TimeRange.FromRaw)
-		payload.Set("targets", jQueries)
-	}
-
-	rbody, err := payload.MarshalJSON()
-	if err != nil {
-		return nil, err
-	}
-
-	url := tsdbReq.Datasource.Url + "/" + queryType
-	req, err := http.NewRequest(http.MethodPost, url, strings.NewReader(string(rbody)))
-	if err != nil {
-		return nil, err
-	}
-
-	req.Header.Add("Content-Type", "application/json")
-
-	return &remoteDatasourceRequest{
-		queryType: queryType,
-		req:       req,
-		queries:   jQueries,
-	}, nil
+	return jsonQueries, nil
 }
 
-func (t *JsonDatasource) parseQueryResponse(queries []*simplejson.Json, body []byte) (*datasource.DatasourceResponse, error) {
+func (ds *JsonDatasource) ParseQueryResponse(queries []*simplejson.Json, body []byte) (*datasource.DatasourceResponse, error) {
 	response := &datasource.DatasourceResponse{}
 	responseBody := []TargetResponseDTO{}
 	err := json.Unmarshal(body, &responseBody)
@@ -159,7 +229,7 @@ func (t *JsonDatasource) parseQueryResponse(queries []*simplejson.Json, body []b
 						}
 						rv.Kind = datasource.RowValue_TYPE_STRING
 					default:
-						t.logger.Debug(fmt.Sprintf("failed to parse value %v of type %T", cell, cell))
+						ds.logger.Debug(fmt.Sprintf("failed to parse value %v of type %T", cell, cell))
 					}
 
 					values = append(values, &rv)
@@ -188,7 +258,7 @@ func (t *JsonDatasource) parseQueryResponse(queries []*simplejson.Json, body []b
 	return response, nil
 }
 
-func (t *JsonDatasource) parseSearchResponse(body []byte) (*datasource.DatasourceResponse, error) {
+func (ds *JsonDatasource) ParseSearchResponse(body []byte) (*datasource.DatasourceResponse, error) {
 	jBody, err := simplejson.NewJson(body)
 	if err != nil {
 		return nil, err

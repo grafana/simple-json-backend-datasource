@@ -23,7 +23,7 @@ type TableColumn struct {
 
 type RowValues []interface{}
 
-type remoteDatasourceRequest struct {
+type RemoteDatasourceRequest struct {
 	queryType string
 	req       *http.Request
 	queries   []*simplejson.Json
