@@ -1,26 +1,28 @@
 import _ from "lodash";
 
-interface TSDBMetricRequest {
-  from: string;
-  to: string;
+interface TSDBRequest {
   queries: any[];
+  from?: string;
+  to?: string;
 }
 
-interface TSDBMetricQuery {
+interface TSDBQuery {
   datasourceId: string;
-  refId: string;
-  queryType: string;
-  hide: boolean;
   target: any;
-  type: 'timeserie' | 'table';
+  queryType?: TSDBQueryType;
+  refId?: string;
+  hide?: boolean;
+  type?: 'timeserie' | 'table';
 }
+
+type TSDBQueryType = 'query' | 'search';
 
 interface TSDBRequestOptions {
-  range: {
+  range?: {
     from: any;
     to: any;
   };
-  targets: TSDBMetricQuery[];
+  targets: TSDBQuery[];
 }
 
 export class GenericDatasource {
@@ -95,14 +97,21 @@ export class GenericDatasource {
   }
 
   metricFindQuery(query) {
-    var interpolated = {
-        target: this.templateSrv.replace(query, null, 'regex')
+    const interpolated: TSDBQuery = {
+      target: this.templateSrv.replace(query, null, 'regex'),
+      datasourceId: this.id,
+      queryType: "search"
     };
 
-    return this.doRequest({
-      url: this.url + '/search',
-      data: interpolated,
-      method: 'POST',
+    return this.doTsdbRequest({
+      targets: [interpolated]
+    }).then(response => {
+      const res = handleTsdbResponse(response)
+      if (res && res.data && res.data.length) {
+        return res.data[0].rows;
+      } else {
+        return [];
+      }
     }).then(mapToTextValue);
   }
 
@@ -114,11 +123,14 @@ export class GenericDatasource {
   }
 
   doTsdbRequest(options: TSDBRequestOptions) {
-    const tsdbRequestData: TSDBMetricRequest = {
-      from: options.range.from.valueOf().toString(),
-      to: options.range.to.valueOf().toString(),
+    const tsdbRequestData: TSDBRequest = {
       queries: options.targets,
     };
+
+    if (options.range) {
+      tsdbRequestData.from = options.range.from.valueOf().toString();
+      tsdbRequestData.to = options.range.to.valueOf().toString();
+    }
 
     return this.backendSrv.datasourceRequest({
       url: '/api/tsdb/query',
@@ -188,11 +200,12 @@ export function handleTsdbResponse(response) {
   });
 
   response.data = res;
+  console.log(res);
   return response;
 }
 
 export function mapToTextValue(result) {
-  return _.map(result.data, (d, i) => {
+  return _.map(result, (d, i) => {
     if (d && d.text && d.value) {
       return { text: d.text, value: d.value };
     } else if (_.isObject(d)) {
