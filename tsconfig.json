@@ -1,19 +1,30 @@
 {
+  "exclude": ["./node_modules/*"],
   "compilerOptions": {
+    "traceResolution": true,
+
     "moduleResolution": "node",
     "target": "es5",
     "lib": ["es6", "dom"],
-    "rootDir": "./src",
-    "jsx": "react",
+
     "module": "esnext",
-    "baseUrl": "./src",
-    "declaration": false,
+    "outDir": "compiled",
+    "declaration": true,
+    "declarationDir": "dist",
+    "strict": true,
+    "alwaysStrict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "typeRoots": ["./node_modules/@types", "types"],
+    "skipLibCheck": true,
+    "removeComments": false,
+
+    "jsx": "react",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "importHelpers": true,
     "noEmitHelpers": true,
-    "removeComments": false,
     "inlineSourceMap": false,
     "sourceMap": true,
     "noEmitOnError": false,
@@ -22,11 +33,11 @@
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noImplicitUseStrict": false,
-    "noImplicitAny": false,
     "downlevelIteration": true,
-    // "noUnusedLocals": true,
+    "noUnusedLocals": true,
     "pretty": true,
-    "typeRoots": ["node_modules/@types"],
-    "skipLibCheck": true
+
+    "rootDir": "./src",
+    "baseUrl": "./src",
   }
 }

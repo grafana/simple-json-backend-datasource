@@ -5,8 +5,11 @@
   "private": true,
   "main": "index.js",
   "scripts": {
+    "prebuild": "webpack/prebuild.sh",
     "build": "webpack --config webpack/webpack.prod.conf.js",
     "dev": "webpack --config webpack/webpack.dev.conf.js",
+    "lint": "tslint --fix -c tslint.json --project tsconfig.json",
+    "format": "prettier-eslint --write \"src/**/*.{ts,tsx,json,css,js,jsx}\"",
     "watch": "webpack --config webpack/webpack.dev.conf.js --watch",
     "test": "./node_modules/grunt-cli/bin/grunt mochaTest",
     "jest": "jest --config jest.config.js"
@@ -22,6 +25,12 @@
   },
   "homepage": "https://github.com/grafana/simple-json-backend-datasource",
   "engineStrict": true,
+  "prettier": {
+    "trailingComma": "es5",
+    "singleQuote": true,
+    "bracketSpacing": false,
+    "printWidth": 100
+  },
   "devDependencies": {
     "@types/angular": "^1.6.43",
     "@types/grafana": "github:CorpGlory/types-grafana",
@@ -43,11 +52,16 @@
     "grunt-execute": "~0.2.2",
     "grunt-mocha-test": "^0.13.2",
     "grunt-systemjs-builder": "^1.0.0",
+    "replace-in-file-webpack-plugin": "^1.0.6",
     "jest": "^24.7.1",
     "jsdom": "~9.12.0",
     "load-grunt-tasks": "^3.5.2",
     "lodash": "^4.17.4",
     "mocha": "^3.2.0",
+    "prettier": "^1.15.3",
+    "prettier-eslint": "^8.8.0",
+    "prettier-eslint-cli": "^4.7.0",
+    "pretty-quick": "^1.10.0",
     "ng-annotate-webpack-plugin": "^0.3.0",
     "prunk": "^1.3.0",
     "q": "^1.5.0",

@@ -10,7 +10,7 @@ class GenericQueryOptionsCtrl {
 }
 
 class GenericAnnotationsQueryCtrl {
-  static templateUrl = 'partials/annotations.editor.html'
+  static templateUrl = 'partials/annotations.editor.html';
 }
 
 export {
@@ -18,5 +18,5 @@ export {
   GenericDatasourceQueryCtrl as QueryCtrl,
   GenericConfigCtrl as ConfigCtrl,
   GenericQueryOptionsCtrl as QueryOptionsCtrl,
-  GenericAnnotationsQueryCtrl as AnnotationsQueryCtrl
+  GenericAnnotationsQueryCtrl as AnnotationsQueryCtrl,
 };
