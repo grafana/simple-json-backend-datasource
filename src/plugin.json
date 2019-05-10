@@ -1,11 +1,7 @@
 {
   "id": "grafana-simple-json-backend-datasource",
-  "name": "Simple Json backend",
+  "name": "Simple Json w/ Backend",
   "type": "datasource",
-
-  "partials": {
-    "config": "public/app/plugins/datasource/simplejson/partials/config.html"
-  },
 
   "metrics": true,
   "annotations": true,
@@ -33,8 +29,8 @@
         "url": "https://github.com/grafana/simple-json-backend-datasource/blob/master/LICENSE"
       }
     ],
-    "version": "1.0.0",
-    "updated": "2019-04-10"
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
   },
 
   "dependencies": {

@@ -1,8 +1,7 @@
 {
   "name": "grafana-simple-json-backend-datasource",
-  "version": "1.0.0",
+  "version": "1.0.0-dev",
   "description": "Simple JSON Datasource (backend version)",
-  "private": true,
   "main": "index.js",
   "scripts": {
     "build": "webpack --config webpack/webpack.prod.conf.js",
@@ -16,7 +15,7 @@
     "url": "git+https://github.com/grafana/simple-json-backend-datasource.git"
   },
   "author": "Grafana Labs",
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/grafana/simple-json-backend-datasource/issues"
   },
@@ -43,6 +42,7 @@
     "grunt-execute": "~0.2.2",
     "grunt-mocha-test": "^0.13.2",
     "grunt-systemjs-builder": "^1.0.0",
+    "replace-in-file-webpack-plugin": "^1.0.6",
     "jest": "^24.7.1",
     "jsdom": "~9.12.0",
     "load-grunt-tasks": "^3.5.2",

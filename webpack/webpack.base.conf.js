@@ -2,10 +2,13 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
+const ReplaceInFileWebpackPlugin = require('replace-in-file-webpack-plugin');
 
 function resolve(dir) {
   return path.join(__dirname, '..', dir);
 }
+
+const packageJson = require('../package.json');
 
 module.exports = {
   target: 'node',
@@ -34,6 +37,22 @@ module.exports = {
       { from: 'plugin.json' },
       { from: 'img/*' },
       { from: 'partials/*' }
+    ]),
+    new ReplaceInFileWebpackPlugin([
+      {
+        dir: 'dist',
+        files: ['plugin.json', 'README.md'],
+        rules: [
+          {
+            search: '%VERSION%',
+            replace: packageJson.version,
+          },
+          {
+            search: '%TODAY%',
+            replace: new Date().toISOString().substring(0, 10),
+          },
+        ],
+      },
     ]),
     new CleanWebpackPlugin({
       cleanStaleWebpackAssets: false,
