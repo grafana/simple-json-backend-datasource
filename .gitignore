@@ -20,3 +20,4 @@ docs/changed-files
 
 # Built plugin
 dist/
+vendor/
