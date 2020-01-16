@@ -11,6 +11,8 @@ Your backend needs to implement 4 urls:
  * `/query` should return metrics based on input.
  * `/annotations` should return annotations.
 
+# Development
+
 ## Installation
 
 To install this plugin using the `grafana-cli` tool:
@@ -31,19 +33,29 @@ information.
 
 You need only docker to build the project this way, but first build may take more time because of the docker images to pull. With `node`, `golang` and `dep` installed locally, it may be faster to build the project locally.
 
-* Install frontend dependencies `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node yarn install --pure-lockfile`
-* Build frontend `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node node_modules/grunt-cli/bin/grunt`
+* Install frontend dependencies `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 yarn install --pure-lockfile`
+* Build frontend `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 node_modules/webpack/bin/webpack.js --config=./webpack/webpack.dev.conf.js`
 * Install backend dependencies `docker run -v ${PWD}:/go/src/github.com/grafana/simple-json-backend-datasource -w /go/src/github.com/grafana/simple-json-backend-datasource instrumentisto/dep ensure`
-* Compile backend `docker run -v ${PWD}:/go/src/github.com/grafana/simple-json-backend-datasource -w /go/src/github.com/grafana/simple-json-backend-datasource golang go build -i -o ./dist/cassandra-plugin_linux_amd64 ./pkg`
+* Compile backend `docker run -v ${PWD}:/go/src/github.com/grafana/simple-json-backend-datasource -w /go/src/github.com/grafana/simple-json-backend-datasource golang go build -i -o ./dist/simple-json-plugin_linux_amd64 ./pkg`
 
 #### Local Way
 
 * Install frontend dependencies `yarn install --pure-lockfile`
-* Build frontend `grunt`
+* Build frontend `webpack --config=./webpack/webpack.dev.conf.js`
 * Install backend dependencies `dep ensure`
-* Compile backend `go build -i -o ./dist/cassandra-plugin_linux_amd64 ./pkg`
+* Compile backend `go build -i -o ./dist/simple-json-plugin_linux_amd64 ./pkg`
 
-### Query API
+## Running fake JSON server
+
+```sh
+cd devenv
+docker-compose up -d
+```
+This will build and run fake sever on the `http://localhost:3333`.
+
+# API
+
+## Query API
 
 Example `timeserie` request
 ``` javascript
@@ -111,7 +123,7 @@ If the metric selected is `"type": "table"`, an example `table` response:
 ]
 ```
 
-### Annotation API
+## Annotation API
 
 The annotation request from the Simple JSON Datasource is a POST request to
 the /annotations endpoint in your datasource. The JSON request body looks like this:
@@ -160,7 +172,7 @@ Access-Control-Allow-Methods:POST
 Access-Control-Allow-Origin:*
 ```
 
-### Search API
+## Search API
 
 Example request
 ``` javascript
@@ -179,25 +191,7 @@ Example map response
 [ { "text" :"upper_25", "value": 1}, { "text" :"upper_75", "value": 2} ]
 ```
 
-### Dev setup
-
-This plugin requires node 6.10.0
-
-```sh
-npm install -g yarn
-yarn install --pure-lockfile
-make
-```
-
-#### Running fake JSON server
-
-```sh
-cd devenv
-docker-compose up -d
-```
-This will build and run fake sever on the `http://localhost:3333`.
-
-### Changelog
+# Changelog
 
 1.3.5
 - Fix for dropdowns in query editor to allow writing template variables (broke due to change in Grafana).
@@ -220,7 +214,7 @@ This will build and run fake sever on the `http://localhost:3333`.
  - Template support for metrics queries
  - Template support for annotation queries
 
-### If using Grafana 2.6
+# If using Grafana 2.6
 NOTE!
 for grafana 2.6 please use [this version](https://github.com/grafana/simple-json-datasource/commit/b78720f6e00c115203d8f4c0e81ccd3c16001f94)
 
