@@ -1,0 +1,15 @@
+version: '3'
+services:
+  fake-simple-json-datasource: # Fake backend to test the plugin
+    image: hadesarchitect/fake-simple-json-datasource
+    ports:
+      - "3333:3333"
+  grafana: # Grafana
+    image: grafana/grafana:6.5.2
+    ports:
+      - "3000:3000"
+    environment:
+      GF_LOG_LEVEL: debug
+    volumes:
+      - /var/lib/grafana
+      - .:/var/lib/grafana/plugins/simple-json-backend
