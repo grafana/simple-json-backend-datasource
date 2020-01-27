@@ -21,7 +21,7 @@ Your backend needs to implement 4 urls:
 * Compile backend `docker run -v ${PWD}:/go/src/github.com/grafana/sjbd -w /go/src/github.com/grafana/sjbd golang go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend`
 * Launch Grafana and Fake SimpleJson Server `docker-compose up -d`
 
-Grafana will be available at `localhost:3000`, add the datasource using url `fake-simple-json-datasource:3333`
+Grafana will be available at `localhost:3000`, add the datasource using url `http://fake-simple-json-datasource:3333`
 
 ## Local Installation
 

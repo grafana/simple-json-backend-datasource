@@ -1,7 +1,7 @@
-all: grunt build
+all: webpack build
 
-grunt:
-	grunt
+webpack:
+	webpack
 
 build:
-	go build -i -o ./dist/simple-json-plugin_linux_amd64 ./pkg
+	go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend

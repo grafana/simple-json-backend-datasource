@@ -176,13 +176,14 @@ describe('GenericDatasource', function() {
 
       var result = mapToTextValue({data: data});
 
-      expect(result).toHaveLength(3);
-      expect(result[0].text).toBe('zero');
-      expect(result[0].value).toBe('value_0');
-      expect(result[1].text).toBe('one');
-      expect(result[1].value).toBe('value_1');
-      expect(result[2].text).toBe('two');
-      expect(result[2].value).toBe('value_2');
+      expect(result[0].text).toHaveLength(3);
+      expect(result[0].value).toBe('data');
+      expect(result[0].text[0].text).toBe('zero');
+      expect(result[0].text[0].value).toBe('value_0');
+      expect(result[0].text[1].text).toBe('one');
+      expect(result[0].text[1].value).toBe('value_1');
+      expect(result[0].text[2].text).toBe('two');
+      expect(result[0].text[2].value).toBe('value_2');
       done();
     });
 
@@ -195,13 +196,12 @@ describe('GenericDatasource', function() {
 
       var result = mapToTextValue({data: data});
 
-      expect(result).toHaveLength(3);
-      expect(result[0].text).toBe(data[0]);
-      expect(result[0].value).toBe(0);
-      expect(result[1].text).toBe(data[1]);
-      expect(result[1].value).toBe(1);
-      expect(result[2].text).toBe(data[2]);
-      expect(result[2].value).toBe(2);
+      expect(result[0].text).toHaveLength(3);
+      expect(result[0].value).toBe('data');
+      expect(result[0].text[0]).toBe(data[0]);
+      expect(result[0].text[1]).toBe(data[1]);
+      expect(result[0].text[2]).toBe(data[2]);
+
       done();
     });
   });
