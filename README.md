@@ -13,7 +13,7 @@ Your backend needs to implement 4 urls:
 
 # Development
 
-## Installation using Docker
+## Installation using Docker (Recommended)
 
 * Install frontend dependencies `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 yarn install --pure-lockfile`
 * Build frontend `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 node_modules/webpack/bin/webpack.js --config=./webpack/webpack.dev.conf.js`
@@ -21,7 +21,7 @@ Your backend needs to implement 4 urls:
 * Compile backend `docker run -v ${PWD}:/go/src/github.com/grafana/sjbd -w /go/src/github.com/grafana/sjbd golang go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend`
 * Launch Grafana and Fake SimpleJson Server `docker-compose up -d`
 
-Grafana will be available at `localhost:3000`, add the datasource using url `http://fake-simple-json-datasource:3333`
+Grafana will be available at `localhost:3000`, **add the datasource using url** `http://fake-simple-json-datasource:3333`
 
 ## Local Installation
 
@@ -50,6 +50,14 @@ information.
 docker-compose up -d fake-simple-json-datasource
 ```
 This will run fake sever on the `http://localhost:3333`.
+
+## Tests
+
+to run tests use:
+
+`docker run -v ${PWD}:/sjbd -w /sjbd node:11 node_modules/jest/bin/jest.js --config jest.config.js`
+
+or locally `jest.js --config jest.config.js`
 
 # API
 
