@@ -18,6 +18,8 @@ Your backend needs to implement 4 urls:
 
 ## Installation using Docker (Recommended)
 
+Video explanation: [Youtube, 3 minutes 37 seconds](https://youtu.be/m4FgMA7b-Jk)
+
 * Install frontend dependencies `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 yarn install --pure-lockfile`
 * Build frontend `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 node_modules/webpack/bin/webpack.js --config=./webpack/webpack.dev.conf.js`
 * Install backend dependencies `docker run -v ${PWD}:/go/src/github.com/grafana/sjbd -w /go/src/github.com/grafana/sjbd instrumentisto/dep ensure`
