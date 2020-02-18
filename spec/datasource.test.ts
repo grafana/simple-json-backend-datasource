@@ -157,13 +157,11 @@ describe('GenericDatasource', function() {
     it ('should return data as text and as value', done => {
       var result = mapToTextValue({data: ["zero", "one", "two"]});
 
-      expect(result).toHaveLength(3);
-      expect(result[0].text).toBe('zero');
-      expect(result[0].value).toBe('zero');
-      expect(result[1].text).toBe('one');
-      expect(result[1].value).toBe('one');
-      expect(result[2].text).toBe('two');
-      expect(result[2].value).toBe('two');
+      expect(result[0].text).toHaveLength(3);
+      expect(result[0].text[0]).toBe('zero');
+      expect(result[0].text[1]).toBe('one');
+      expect(result[0].text[2]).toBe('two');
+      expect(result[0].value).toBe('data');
       done();
     });
 
