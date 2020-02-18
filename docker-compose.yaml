@@ -1,6 +1,6 @@
 version: '3'
 services:
-  fake-simple-json-datasource: # Fake backend to test the plugin
+  fake-simple-json-datasource: # Fake source to test the plugin
     image: hadesarchitect/fake-simple-json-datasource
     ports:
       - "3333:3333"
