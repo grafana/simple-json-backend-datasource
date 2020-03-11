@@ -87,14 +87,19 @@ jobs:
 
                         # Install Mage
                         mkdir -p ~/go/bin
-                        git clone https://github.com/magefile/mage.git
-                        cd mage
-                        go run bootstrap.go
+                        
+                        if [ -f 'Makefile' ]; then
+                            make build    
+                        else
+                            git clone https://github.com/magefile/mage.git
+                            cd mage
+                            go run bootstrap.go
 
-                        mage -v buildAll
-                        mage -v lint
-                        mage -v coverage
-                        npx grafana-toolkit plugin:ci-build --finish
+                            mage -v buildAll
+                            mage -v lint
+                            mage -v coverage
+                        fi
+                        npx grafana-toolkit plugin:ci-build --finish                        
                     else
                         echo "No packend plugin detected. Skipped."
                     fi
