@@ -72,7 +72,8 @@ jobs:
                         echo 'export PATH=$HOME/go/bin:/usr/local/go/bin:$PATH' >> $BASH_ENV
                         source $BASH_ENV
 
-                        pushd ~/tmp
+                        [ -d "$HOME/tmp" ] || mkdir -pv "$HOME/tmp"
+                        pushd "$HOME/tmp"
 
                         # Install Go
                         curl -fLO https://dl.google.com/go/go1.14.linux-amd64.tar.gz
