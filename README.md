@@ -1,5 +1,14 @@
 ## Simple JSON Datasource - a generic backend datasource
 
+> This plugin is **no longer maintained** by the Grafana team.
+>
+> If you're looking for an example of a data source plugin, refer to [grafana-starter-datasource-backend](https://github.com/grafana/grafana-starter-datasource-backend).
+>
+> If you're using this plugin, check out a couple of alternatives:
+>
+> - [JSON](https://grafana.com/grafana/plugins/simpod-json-datasource) by Šimon Podlipský
+> - [JSON API](https://grafana.com/grafana/plugins/marcusolsson-json-datasource) by Marcus Olsson
+>
 More documentation about datasource plugins can be found in the [Docs](https://grafana.com/docs/grafana/latest/developers/plugins/).
 
 This also serves as a living example implementation of a datasource.
