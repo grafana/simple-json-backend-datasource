@@ -1,4 +1,4 @@
-import _ from "lodash";
+import _ from 'lodash';
 
 interface TSDBRequest {
   queries: any[];
@@ -41,7 +41,7 @@ export class GenericDatasource {
     this.name = instanceSettings.name;
     this.id = instanceSettings.id;
     this.withCredentials = instanceSettings.withCredentials;
-    this.headers = {'Content-Type': 'application/json'};
+    this.headers = { 'Content-Type': 'application/json' };
     if (typeof instanceSettings.basicAuth === 'string' && instanceSettings.basicAuth.length > 0) {
       this.headers['Authorization'] = instanceSettings.basicAuth;
     }
@@ -52,7 +52,7 @@ export class GenericDatasource {
     query.targets = query.targets.filter(t => !t.hide);
 
     if (query.targets.length <= 0) {
-      return Promise.resolve({data: []});
+      return Promise.resolve({ data: [] });
     }
 
     return this.doTsdbRequest(query).then(handleTsdbResponse);
@@ -62,15 +62,29 @@ export class GenericDatasource {
     return this.doRequest({
       url: this.url + '/',
       method: 'GET',
-    }).then(response => {
-      if (response.status === 200) {
-        return { status: "success", message: "Data source is working", title: "Success" };
-      } else {
-        return { status: "failed", message: "Data source is not working", title: "Error" };
-      }
-    }).catch(error => {
-      return { status: "failed", message: "Data source is not working", title: "Error" };
-    });
+    })
+      .then(response => {
+        if (response.status === 200) {
+          return {
+            status: 'success',
+            message: 'Data source is working',
+            title: 'Success',
+          };
+        } else {
+          return {
+            status: 'failed',
+            message: 'Data source is not working',
+            title: 'Error',
+          };
+        }
+      })
+      .catch(error => {
+        return {
+          status: 'failed',
+          message: 'Data source is not working',
+          title: 'Error',
+        };
+      });
   }
 
   annotationQuery(options) {
@@ -82,15 +96,15 @@ export class GenericDatasource {
         datasource: options.annotation.datasource,
         enable: options.annotation.enable,
         iconColor: options.annotation.iconColor,
-        query: query
+        query: query,
       },
-      rangeRaw: options.rangeRaw
+      rangeRaw: options.rangeRaw,
     };
 
     return this.doRequest({
       url: this.url + '/annotations',
       method: 'POST',
-      data: annotationQuery
+      data: annotationQuery,
     }).then(result => {
       return result.data;
     });
@@ -100,19 +114,21 @@ export class GenericDatasource {
     const interpolated: TSDBQuery = {
       target: this.templateSrv.replace(query, null, 'regex'),
       datasourceId: this.id,
-      queryType: "search"
+      queryType: 'search',
     };
 
     return this.doTsdbRequest({
-      targets: [interpolated]
-    }).then(response => {
-      const res = handleTsdbResponse(response)
-      if (res && res.data && res.data.length) {
-        return res.data[0].rows;
-      } else {
-        return [];
-      }
-    }).then(mapToTextValue);
+      targets: [interpolated],
+    })
+      .then(response => {
+        const res = handleTsdbResponse(response);
+        if (res && res.data && res.data.length) {
+          return res.data[0].rows;
+        } else {
+          return [];
+        }
+      })
+      .then(mapToTextValue);
   }
 
   doRequest(options) {
@@ -135,7 +151,7 @@ export class GenericDatasource {
     return this.backendSrv.datasourceRequest({
       url: '/api/tsdb/query',
       method: 'POST',
-      data: tsdbRequestData
+      data: tsdbRequestData,
     });
   }
 
@@ -152,7 +168,7 @@ export class GenericDatasource {
         refId: target.refId,
         hide: target.hide,
         type: target.type || 'timeserie',
-        datasourceId: this.id
+        datasourceId: this.id,
       };
     });
 
@@ -166,7 +182,7 @@ export class GenericDatasource {
       this.doRequest({
         url: this.url + '/tag-keys',
         method: 'POST',
-        data: options
+        data: options,
       }).then(result => {
         return resolve(result.data);
       });
@@ -178,7 +194,7 @@ export class GenericDatasource {
       this.doRequest({
         url: this.url + '/tag-values',
         method: 'POST',
-        data: options
+        data: options,
       }).then(result => {
         return resolve(result.data);
       });
@@ -187,10 +203,10 @@ export class GenericDatasource {
 }
 
 export function handleTsdbResponse(response) {
-  const res= [];
+  const res = [];
   _.forEach(response.data.results, r => {
     _.forEach(r.series, s => {
-      res.push({target: s.name, datapoints: s.points});
+      res.push({ target: s.name, datapoints: s.points });
     });
     _.forEach(r.tables, t => {
       t.type = 'table';
@@ -209,7 +225,7 @@ export function mapToTextValue(result) {
     if (d && d.text && d.value) {
       return { text: d.text, value: d.value };
     } else if (_.isObject(d)) {
-      return { text: d, value: i};
+      return { text: d, value: i };
     }
     return { text: d, value: d };
   });

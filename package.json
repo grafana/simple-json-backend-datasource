@@ -5,11 +5,10 @@
   "private": true,
   "main": "index.js",
   "scripts": {
-    "build": "webpack --config webpack/webpack.prod.conf.js",
-    "dev": "webpack --config webpack/webpack.dev.conf.js",
-    "watch": "webpack --config webpack/webpack.dev.conf.js --watch",
-    "test": "./node_modules/grunt-cli/bin/grunt mochaTest",
-    "jest": "jest --config jest.config.js"
+    "build": "grafana-toolkit plugin:build",
+    "test": "grafana-toolkit plugin:test",
+    "dev": "grafana-toolkit plugin:dev",
+    "watch": "grafana-toolkit plugin:dev --watch"
   },
   "repository": {
     "type": "git",
@@ -27,22 +26,16 @@
     "@types/grafana": "github:CorpGlory/types-grafana",
     "@types/jest": "^24.0.11",
     "@types/lodash": "^4.14.116",
-    "babel-plugin-transform-es2015-for-of": "^6.6.0",
-    "babel-plugin-transform-es2015-modules-systemjs": "^6.24.1",
-    "babel-preset-es2015": "^6.24.1",
+    "@grafana/toolkit": "canary",
     "chai": "~3.5.0",
     "clean-webpack-plugin": "^2.0.1",
     "copy-webpack-plugin": "^5.0.2",
+    "grafana-plugin-sdk-go": "github:grafana/grafana-plugin-sdk-go",
+    "grpc": "1.24.2",
+    "@grpc/proto-loader": "0.5.3",
+    "simple-node-logger": "18.12.24",
+    "pkg": "4.4.3",
     "css-loader": "^2.1.1",
-    "grunt-babel": "~6.0.0",
-    "grunt-cli": "^1.2.0",
-    "grunt-contrib-clean": "^1.1.0",
-    "grunt-contrib-copy": "^1.0.0",
-    "grunt-contrib-uglify": "^2.3.0",
-    "grunt-contrib-watch": "^1.0.0",
-    "grunt-execute": "~0.2.2",
-    "grunt-mocha-test": "^0.13.2",
-    "grunt-systemjs-builder": "^1.0.0",
     "jest": "^24.7.1",
     "jsdom": "~9.12.0",
     "load-grunt-tasks": "^3.5.2",
@@ -55,9 +48,7 @@
     "ts-jest": "^24.0.2",
     "ts-loader": "^5.3.3",
     "tslint": "^5.15.0",
-    "typescript": "^3.4.3",
-    "webpack": "^4.29.6",
-    "webpack-cli": "^3.3.0"
+    "typescript": "^3.4.3"
   },
   "dependencies": {}
 }
