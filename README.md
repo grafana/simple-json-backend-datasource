@@ -20,7 +20,24 @@ Your backend needs to implement 4 urls:
  * `/query` should return metrics based on input.
  * `/annotations` should return annotations.
 
-## Installation
+# Development
+
+* The frontend part located in the `src/` folder
+* The backend part located in the `backend/` folder
+
+## Installation using Docker (Recommended)
+
+Video explanation: [Youtube, 3 minutes 37 seconds](https://youtu.be/m4FgMA7b-Jk)
+
+* Install frontend dependencies `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 yarn install --pure-lockfile`
+* Build frontend `docker run -v ${PWD}:/opt/sjbd -w /opt/sjbd node:11 node_modules/webpack/bin/webpack.js --config=./webpack/webpack.dev.conf.js`
+* Install backend dependencies `docker run -v ${PWD}:/go/src/github.com/grafana/sjbd -w /go/src/github.com/grafana/sjbd instrumentisto/dep ensure`
+* Compile backend `docker run -v ${PWD}:/go/src/github.com/grafana/sjbd -w /go/src/github.com/grafana/sjbd golang go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend`
+* Launch Grafana and Fake SimpleJson Server `docker-compose up -d`
+
+Grafana will be available at `localhost:3000`, login `admin`, password `admin`. **Add the datasource using url** `http://fake-simple-json-datasource:3333`.
+
+## Local Installation
 
 To install this plugin using the `grafana-cli` tool:
 ```
@@ -34,7 +51,31 @@ information.
 - https://github.com/bergquist/fake-simple-json-datasource
 - https://github.com/smcquay/jsonds
 
-### Query API
+### Build the project
+
+* Install frontend dependencies `yarn install --pure-lockfile`
+* Build frontend `webpack --config=./webpack/webpack.dev.conf.js`
+* Install backend dependencies `dep ensure`
+* Compile backend `go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend`
+
+## Running fake JSON server
+
+```sh
+docker-compose up -d fake-simple-json-datasource
+```
+This will run fake sever on the `http://localhost:3333`.
+
+## Tests
+
+to run tests use:
+
+`docker run -v ${PWD}:/sjbd -w /sjbd node:11 node_modules/jest/bin/jest.js --config jest.config.js`
+
+or locally `jest.js --config jest.config.js`
+
+# API
+
+## Query API
 
 Example `timeserie` request
 ``` javascript
@@ -102,7 +143,7 @@ If the metric selected is `"type": "table"`, an example `table` response:
 ]
 ```
 
-### Annotation API
+## Annotation API
 
 The annotation request from the Simple JSON Datasource is a POST request to
 the /annotations endpoint in your datasource. The JSON request body looks like this:
@@ -151,7 +192,7 @@ Access-Control-Allow-Methods:POST
 Access-Control-Allow-Origin:*
 ```
 
-### Search API
+## Search API
 
 Example request
 ``` javascript
@@ -170,25 +211,7 @@ Example map response
 [ { "text" :"upper_25", "value": 1}, { "text" :"upper_75", "value": 2} ]
 ```
 
-### Dev setup
-
-This plugin requires node 6.10.0
-
-```sh
-npm install -g yarn
-yarn install --pure-lockfile
-make
-```
-
-#### Running fake JSON server
-
-```sh
-cd devenv
-docker-compose up -d
-```
-This will build and run fake sever on the `http://localhost:3333`.
-
-### Changelog
+# Changelog
 
 1.3.5
 - Fix for dropdowns in query editor to allow writing template variables (broke due to change in Grafana).
@@ -211,7 +234,7 @@ This will build and run fake sever on the `http://localhost:3333`.
  - Template support for metrics queries
  - Template support for annotation queries
 
-### If using Grafana 2.6
+# If using Grafana 2.6
 NOTE!
 for grafana 2.6 please use [this version](https://github.com/grafana/simple-json-datasource/commit/b78720f6e00c115203d8f4c0e81ccd3c16001f94)
 

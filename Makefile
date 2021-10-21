@@ -1,7 +1,14 @@
-all: grunt build
+all: webpack build
+deps: deps-front deps-back
 
-grunt:
-	grunt
+webpack:
+	webpack --config=./webpack/webpack.dev.conf.js
 
 build:
-	go build -i -o ./dist/simple-json-plugin_linux_amd64 ./pkg
+	go build -i -o ./dist/simple-json-plugin_linux_amd64 ./backend
+
+deps-front:
+	yarn install --pure-lockfile
+
+deps-back:
+	dep ensure
